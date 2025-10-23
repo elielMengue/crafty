@@ -1,4 +1,5 @@
-import { type Message, PostMessageUseCase, type PostMessage, MessageRepository, DateProvider, MessageTooLongError, EmptyMessageError } from "../post-message.usecase";
+import { type Message, PostMessageUseCase, type PostMessage, DateProvider, MessageTooLongError, EmptyMessageError } from "../post-message.usecase";
+import { inMemoryMessageRepository } from "../message.inmemory.repository";
 
 
 describe("Feature: Posting Messages", () => {
@@ -55,22 +56,30 @@ describe("Feature: Posting Messages", () => {
             fixture.thenErrorShouldBe(EmptyMessageError);
         
     });
+
+    test("Alice cannot post a message with only whitespaces", () => {
+            fixture.givenNowIs(new Date("2024-06-01T12:00:00Z"));
+
+            fixture.WhenUserPostAMessage({
+                id:"message-id-3",
+                text: "  ",
+                author: "alice",
+            })
+
+            fixture.thenErrorShouldBe(EmptyMessageError);
+        
+    });
 });
 });
+
+
+
 
 
 
 
 
 // In-memory representation of the posted message
-
-
-class inMemoryMessageRepository implements MessageRepository {
-    message: Message
-    save(msg: Message): void{
-        this.message = msg;
-    }
-}
 
 class StubDateProvider implements DateProvider {
     now: Date = new Date();
@@ -104,11 +113,11 @@ const createFixture = () => {
                 }
         },
 
-        thenPostedMessageShouldBe(ExpectedMessage: Message){
-            expect(ExpectedMessage).toEqual(messageRepository.message)
-        },
+thenPostedMessageShouldBe(ExpectedMessage: Message){
+    expect(ExpectedMessage).toEqual(messageRepository.message)
+},
 
-        thenErrorShouldBe(expectedErrorClass: Error){
+thenErrorShouldBe(expectedErrorClass: new (...args: any[]) => Error){
     expect(thrownError).toBeInstanceOf(expectedErrorClass)
 }
 
